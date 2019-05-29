@@ -1,0 +1,61 @@
+编译用于andriod环境下openssl
+1、概述
+	将openssl编译成ARM环境可以使用的.so或.a文件。APP可以通过JNI调用。
+2、搭建环境
+2.1、ubuntu下安装NDK
+	1、创建ndk目录：mkdir /mnt/ndk
+	2、进入ndk目录：cd /mnt/ndk
+	3、下载ndk源码包：wget https://dl.google.com/android/repository/android-ndk-r14b-linux-x86_64.zip
+	4、解压源码包：unzip android-ndk-r14b-linux-x86_64.zip
+2.2、openssl源码下载以及编译
+2.2.1、openssl源码下载
+	1、进入目录：cd /mnt/
+	2、下载openssl源码包：wget https://www.openssl.org/source/openssl-1.1.0f.tar.gz
+	3、解压openssl源码包：tar -zxvf openssl-1.1.0f.tar.gz
+	4、进入openssl目录：cd /mnt/openssl-1.1.0f
+	5、下载Setenv-android.sh文件：wget https://wiki.openssl.org/images/7/70/Setenv-android.sh
+2.2.2、修改Setenv-android.sh文件：
+	1、修改NDK版本：将_ANDROID_NDK="android-ndk-r9"修改为_ANDROID_NDK="android-ndk-r14b"
+	2、修改GCC编译器版本：将_ANDROID_EABI="arm-linux-androideabi-4.8"修改为_ANDROID_EABI="arm-linux-androideabi-4.9" 
+	说明：
+		_ANDROID_NDK - NDK的版本。例如，android-ndk-r8e
+		_ANDROID_ARCH - 架构。例如，arch-arm或arch-x86
+		_ANDROID_EABI - EABI工具的版本。例如，arm-linux-androideabi-4.6，arm-linux-androideabi-4.8，x86-4.6或x86-4.8
+		_ANDROID_API - API级别。例如，android-14或android-18
+2.2.3、设置环境变量
+	1、export ANDROID_NDK_ROOT=/mnt/d/ndk/android-ndk-r14b
+	2、export ANDROID_TOOLCHAIN: /mnt/d/ndk/android-ndk-r14b/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin
+	3、source ./setenv-android.sh
+	    输出：
+		ANDROID_NDK_ROOT: /mnt/d/ndk/android-ndk-r14b
+		ANDROID_ARCH: arch-arm
+		ANDROID_EABI: arm-linux-androideabi-4.9
+		ANDROID_API: android-18
+		ANDROID_SYSROOT: /mnt/d/ndk/android-ndk-r14b/platforms/android-18/arch-arm
+		ANDROID_TOOLCHAIN: /mnt/d/ndk/android-ndk-r14b/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin
+		FIPS_SIG: /mnt/d/openssl-1.1.0f/util/incore
+		CROSS_COMPILE: arm-linux-androideabi-
+		ANDROID_DEV: /mnt/d/ndk/android-ndk-r14b/platforms/android-18/arch-arm/usr
+2.2.4、编译、安装：
+	1、./config no-shared no-ssl2 no-ssl3 no-comp no-hw no-engine --openssldir=/mnt/d/openssl-output/$ANDROID_API --prefix=/mnt/d/openssl-output/$ANDROID_API
+	2、make depend
+	3、make all -jn //n表示并发编译线程数量
+	4、make install
+2.2.5、说明：
+	--openssldir=OPENSSLDIR：	安装目录，默认是 /usr/local/ssl 。
+	--prefix=PREFIX：		设置 lib include bin 目录的前缀，默认为 OPENSSLDIR 目录。
+	--install_prefix=DESTDIR：	设置安装时以此目录作为"根"目录，通常用于打包，默认为空。
+	zlib、zlib-dynamic、no-zlib：	使用静态的zlib压缩库、使用动态的zlib压缩库、不使用zlib压缩功能。
+	threads、no-threads：		是否编译支持多线程的库。默认支持。
+	shared、no-shared：		是否生成动态连接库。
+	asm、no-asm：			是否在编译过程中使用汇编代码加快编译过程。
+	enable-sse2、no-sse2：		启用/禁用SSE2指令集加速。如果你的CPU支持SSE2指令集，就可以打开，否则就要关闭。
+	gmp、no-gmp：			启用/禁用GMP库
+	rfc3779、no-rfc3779：		启用/禁用实现X509v3证书的IP地址扩展
+	krb5、no-krb5：			启用/禁用 Kerberos 5 支持
+	ssl、no-ssl、ssl2、ssl3、no-ssl2、no-ssl3、tls、no-tls：启用/禁用 SSL(包含了SSL2/SSL3) TLS 协议支持。
+	dso、no-dso：			启用/禁用调用其它动态链接库的功能。[提示]no-dso仅在no-shared的前提下可用。
+	no-comp：			数据压缩算法
+
+
+
